@@ -39,8 +39,11 @@ void ofApp::setup(){
     andalemono.loadFont("andalemono.ttf", 16, true, true);
     andalemono.setLetterSpacing(1.4);
     
-    recognize.loadImage("recognize.jpg");
+    recognize.loadImage("tile2.jpg");
     tilesample.setFromPixels(recognize);
+    
+    recognize1.loadImage("tile1.jpg");
+    tilesample1.setFromPixels(recognize1);
     
 }
 
@@ -93,17 +96,41 @@ void ofApp::update(){
         subjectImg.allocate(tilesample.width, tilesample.height);//Allocate space for the template
         subjectImg = tilesample; //Copy the specific area to the subject image
         
+        subjectImg1.allocate(tilesample1.width, tilesample1.height);//Allocate space for the template
+        subjectImg1 = tilesample1; //Copy the specific area to the subject image
+        
         
         IplImage *result = cvCreateImage(cvSize(capW - subjectImg.width + 1, capH - subjectImg.height + 1), 32, 1);
+        cvMatchTemplate(colorImg.getCvImage(), subjectImg.getCvImage(), result, CV_TM_CCORR_NORMED);
         
-        cvMatchTemplate(colorImg.getCvImage(), subjectImg.getCvImage(), result, CV_TM_SQDIFF);
+        IplImage *result1 = cvCreateImage(cvSize(capW - subjectImg1.width + 1, capH - subjectImg1.height + 1), 32, 1);
+        cvMatchTemplate(colorImg.getCvImage(), subjectImg1.getCvImage(), result1, CV_TM_CCORR_NORMED);
         
         double minVal, maxVal;
         CvPoint minLoc, maxLoc;
         cvMinMaxLoc(result, &minVal, &maxVal, &minLoc, &maxLoc, 0);
+        //cvThreshold(subjectImg.getCvImage(), colorImg.getCvImage(), 0.8, 1, CV_THRESH_TOZERO);
+
+        double minVal1, maxVal1;
+        CvPoint minLoc1, maxLoc1;
+        cvMinMaxLoc(result1, &minVal1, &maxVal1, &minLoc1, &maxLoc1, 0);
         
         subjectLocation.x = minLoc.x;
         subjectLocation.y = minLoc.y;
+        
+        subjectLocation1.x = minLoc1.x;
+        subjectLocation1.y = minLoc1.y;
+        
+        double threshholdMatch;
+        threshholdMatch = .978;
+        
+        double threshholdMatch1;
+        threshholdMatch1 = .905;
+        
+        certain = maxVal > threshholdMatch;
+        certain1 = maxVal1 > threshholdMatch1;
+
+        //maximumvalue = maxVal;
 }
 
 //--------------------------------------------------------------
@@ -144,8 +171,8 @@ void ofApp::draw(){
         ofSetColor(255);
         ofDrawBitmapString(ofToString(ofGetFrameRate()), 20, 20);
 	
-        //ofPushMatrix();
-        //ofScale(2.135, 2.135, 1);
+        ofPushMatrix();
+        ofScale(2.135, 2.135, 1);
         //ofScale(1, 1, 1);
 
         // draw the incoming, the grayscale, the bg and the thresholded difference
@@ -160,7 +187,6 @@ void ofApp::draw(){
             //contourFinder.blobs[i].draw(0, 0);
         //}
 
-        //ofPopMatrix();
         // finally, a report:
 
         ofSetHexColor(0xffffff);
@@ -168,11 +194,22 @@ void ofApp::draw(){
         sprintf(reportStr, "bg subtraction and blob detection\npress ' ' to capture bg\nthreshold %i\nnum blobs found %i, fps: %f", threshold, contourFinder.nBlobs, ofGetFrameRate());
         //ofDrawBitmapString(reportStr, 4, 380);
         
-        ofSetLineWidth(1);
+        ofSetLineWidth(3);
         ofNoFill();
-        ofSetHexColor(0xffffff);
         //ofSetRectMode(OF_RECTMODE_CENTER);
-        ofRect(subjectLocation.x, subjectLocation.y, tilesample.width, tilesample.height);
+        
+        if(certain){
+            ofSetColor(255,0,0);
+            ofRect(subjectLocation.x, subjectLocation.y, tilesample.width, tilesample.height);
+        }
+        
+        if(certain1){
+            ofSetColor(0,255,0);
+            ofRect(subjectLocation1.x, subjectLocation1.y, tilesample1.width, tilesample1.height);
+        }
+        
+        ofPopMatrix();
+
         
         if(searching == true){
             /*
