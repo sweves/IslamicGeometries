@@ -5,7 +5,7 @@
 void ofApp::setup(){
     ofTrueTypeFont::setGlobalDpi(72);
     
-	ofSetOrientation(OF_ORIENTATION_90_RIGHT);//Set iOS to Orientation Landscape Right
+	ofSetOrientation(OF_ORIENTATION_90_LEFT);//Set iOS to Orientation Landscape Right
 
 	capW = 320;
 	capH = 240;

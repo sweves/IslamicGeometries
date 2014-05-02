@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>026A8773-5C7D-44DD-B2C2-45ECC000B8C3</string>
+	<key>IDESourceControlProjectName</key>
+	<string>TilesFinal</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>4D9DB44F-9390-4467-9AA2-C8645C89CA8A</key>
+		<string>https://github.com/sweves/IslamicGeometries.git</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>TilesFinal/TilesFinal.xcodeproj/project.xcworkspace</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>4D9DB44F-9390-4467-9AA2-C8645C89CA8A</key>
+		<string>../../..</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>https://github.com/sweves/IslamicGeometries.git</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>110</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>4D9DB44F-9390-4467-9AA2-C8645C89CA8A</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>4D9DB44F-9390-4467-9AA2-C8645C89CA8A</string>
+			<key>IDESourceControlWCCName</key>
+			<string>IslamicGeometries</string>
+		</dict>
+	</array>
+</dict>
+</plist>
