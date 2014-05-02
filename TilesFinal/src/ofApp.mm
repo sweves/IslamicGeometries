@@ -47,8 +47,8 @@ void ofApp::drawSingleTile(){
     
     //add the texture
     ofEnableBlendMode(OF_BLENDMODE_MULTIPLY);
-    ofSetColor(255, 238, 195, 140);
-    stoneTexture.draw(0, 0, ofGetWidth(), ofGetHeight());
+    //ofSetColor(255, 238, 195, 140);
+    //stoneTexture.draw(0, 0, ofGetWidth(), ofGetHeight());
 }
 //--------------------------------------------------------------
 void ofApp::drawMultipleTiles(){
@@ -100,8 +100,10 @@ void ofApp::drawMultipleTiles(){
         
         //add the texture
         ofEnableBlendMode(OF_BLENDMODE_MULTIPLY);
-        ofSetColor(255, 238, 195, 140);
-        stoneTexture.draw(0, 0, ofGetWidth(), ofGetHeight());
+        //ofSetColor(255, 238, 195, 140);
+        //stoneTexture.draw(0, 0, ofGetWidth(), ofGetHeight());
+        
+
     }
 }
 
@@ -152,12 +154,17 @@ void ofApp::drawCardioid2(int change, int startPoint){ //the sand colored tile
 }
 //--------------------------------------------------------------
 void ofApp::setup(){
+    
+    ofTrueTypeFont::setGlobalDpi(72);
+
+    
+    //---------------BETTYS TILE CODE
 	
     ofSetOrientation(OF_ORIENTATION_90_LEFT);
     //ofSetVerticalSync(true);
     ofEnableAlphaBlending();
     ofSetLineWidth(3);
-    ofBackground(0, 0, 0);
+    //ofBackground(0, 0, 0);
     // ofBackgroundGradient(ofColor::gray, ofColor::black);
     
     gui.setup(); // most of the time you don't need a name to setup the GUI
@@ -169,7 +176,7 @@ void ofApp::setup(){
     gui.add(cardioid2Size.setup("Outer tile size", 0, -7, 7));
     gui.add(warpInner.setup("Inner tile warp", 0, -50, 50));
     gui.add(warpOuter.setup("Outer tile warp", 0, -50, 50));
-    gui.add(multiple.setup("Multiple tiles", false));
+    //gui.add(multiple.setup("Multiple tiles", false));
     
 	bHide = true;
     
@@ -177,24 +184,237 @@ void ofApp::setup(){
     cardioidOrder = 0;
     
     stoneTexture.loadImage(("stoneTexture1.jpg"));
+    
+    // START SCREEN
+    startscreen = true;
+    objectdetect = false;
+    searching = false;
+    
+    tile.loadImage("tile.png");
+    andalemono.loadFont("andalemono.ttf", 16, true, true);
+    andalemono.setLetterSpacing(1.4);
+    
+    //---------------SARAHS OPENCV CODE
+    
+    capW = 320;
+	capH = 240;
+    
+    vidGrabber.initGrabber(capW, capH);
+    capW = vidGrabber.getWidth();
+    capH = vidGrabber.getHeight();
+
+    colorImg.allocate(capW,capH);
+    grayImage.allocate(capW,capH);
+    grayBg.allocate(capW,capH);
+    grayDiff.allocate(capW,capH);
+    
+	bLearnBakground = true;
+	threshold = 80;
+	
+	ofSetFrameRate(20);
+    
+    recognize.loadImage("tile2.jpg");
+    tilesample.setFromPixels(recognize);
+    
+    recognize1.loadImage("tile1.jpg");
+    tilesample1.setFromPixels(recognize1);
+    
 
 }
 
 //--------------------------------------------------------------
 void ofApp::update(){
+    if(startscreen == true){
+        ofBackground(100,100,100);
+    }
+
+    vidGrabber.update();
+    
+    if( vidGrabber.getPixels() != NULL ){
+        colorImg.setFromPixels(vidGrabber.getPixels(), capW, capH);
+
+	}
+        if(objectdetect == true){
+
+        subjectImg.allocate(tilesample.width, tilesample.height);//Allocate space for the template
+        subjectImg = tilesample; //Copy the specific area to the subject image
+        
+        subjectImg1.allocate(tilesample1.width, tilesample1.height);//Allocate space for the template
+        subjectImg1 = tilesample1; //Copy the specific area to the subject image
+        
+        
+        IplImage *result = cvCreateImage(cvSize(capW - subjectImg.width + 1, capH - subjectImg.height + 1), 32, 1);
+        cvMatchTemplate(colorImg.getCvImage(), subjectImg.getCvImage(), result, CV_TM_CCORR_NORMED);
+        
+        IplImage *result1 = cvCreateImage(cvSize(capW - subjectImg1.width + 1, capH - subjectImg1.height + 1), 32, 1);
+        cvMatchTemplate(colorImg.getCvImage(), subjectImg1.getCvImage(), result1, CV_TM_CCORR_NORMED);
+        
+        double minVal, maxVal;
+        CvPoint minLoc, maxLoc;
+        cvMinMaxLoc(result, &minVal, &maxVal, &minLoc, &maxLoc, 0);
+        //cvThreshold(subjectImg.getCvImage(), colorImg.getCvImage(), 0.8, 1, CV_THRESH_TOZERO);
+        
+        double minVal1, maxVal1;
+        CvPoint minLoc1, maxLoc1;
+        cvMinMaxLoc(result1, &minVal1, &maxVal1, &minLoc1, &maxLoc1, 0);
+        
+        subjectLocation.x = minLoc.x;
+        subjectLocation.y = minLoc.y;
+        
+        subjectLocation1.x = minLoc1.x;
+        subjectLocation1.y = minLoc1.y;
+        
+        double threshholdMatch;
+        threshholdMatch = .98;
+        
+        double threshholdMatch1;
+        threshholdMatch1 = .89;
+    cout << "maxVal :" << maxVal << endl;
+            cout << "maxVal1 :" << maxVal1 << endl;
+
+    
+        certain = maxVal > threshholdMatch;
+        certain1 = maxVal1 > threshholdMatch1;
+        
+        //maximumvalue = maxVal;
+    }
 
 }
 
 //--------------------------------------------------------------
 void ofApp::draw(){
     
-    if( multiple ){
-        drawMultipleTiles();
-	}else{
+    //----------------------START SCREEN
+    
+    if(startscreen == true){
+        ofBackground(40, 40, 40);
+        ofSetColor(255, 255, 255);
+        
+        ofSetRectMode(OF_RECTMODE_CENTER);
+        tile.draw(ofGetWidth()/2.0, (ofGetHeight()/2.0)-90);
+        
+        ofSetColor(0, 130, 130);
+        ofRect(ofGetWidth()/2.0, (ofGetHeight()/2.0+90), 260, 50);
+        
+        ofSetColor(255, 255, 255);
+        andalemono.drawString("SEARCH FOR TILES", ofGetWidth()/2.0-110, (ofGetHeight()/2.0+95));
+        
+        if (pressed == true){
+            
+            ofSetColor(0, 80, 80);
+            ofRect(ofGetWidth()/2.0, (ofGetHeight()/2.0+90), 260, 50);
+            
+            ofSetColor(255, 255, 255);
+            andalemono.drawString("SEARCH FOR TILES", ofGetWidth()/2.0-110, (ofGetHeight()/2.0+95));
+        }
+    }
+    
+    //OBJECT DETECT
+	
+    if(objectdetect == true){
+        
+        
+        ofSetRectMode(OF_RECTMODE_CORNER);
+        ofSetColor(255);
+        ofDrawBitmapString(ofToString(ofGetFrameRate()), 20, 20);
+        
+        ofPushMatrix();
+        ofScale(2.135, 2.135, 1);
+        //ofScale(1, 1, 1);
+        
+        // draw the incoming, the grayscale, the bg and the thresholded difference
+        ofSetHexColor(0xffffff);
+        colorImg.draw(0,0);
+        //grayBg.draw(capW+4, 0);
+        //grayDiff.draw(0, capH + 4);
+        
+        // lets draw the contours.
+        // this is how to get access to them:
+        //for (int i = 0; i < contourFinder.nBlobs; i++){
+        //contourFinder.blobs[i].draw(0, 0);
+        //}
+        
+        // finally, a report:
+        
+        ofSetHexColor(0xffffff);
+        char reportStr[1024];
+        sprintf(reportStr, "bg subtraction and blob detection\npress ' ' to capture bg\nthreshold %i\nnum blobs found %i, fps: %f", threshold, contourFinder.nBlobs, ofGetFrameRate());
+        //ofDrawBitmapString(reportStr, 4, 380);
+        
+        ofSetLineWidth(3);
+        ofNoFill();
+        //ofSetRectMode(OF_RECTMODE_CENTER);
+        
+        /*if(certain){
+            ofSetColor(255,0,0);
+            ofRect(subjectLocation.x, subjectLocation.y, tilesample.width, tilesample.height);
+        }*/
+        
+        cout << "certain " << certain << endl;
+        cout << "subject x " << subjectLocation.x << endl;
+        cout << "subject y " << subjectLocation.y << endl;
+
+        
+        if(certain1){
+          //  ofSetColor(0,255,0);
+           // ofRect(subjectLocation1.x, subjectLocation1.y, tilesample1.width, tilesample1.height);
+                    andalemono.drawString("TILE COMING SOON", ofGetWidth()/2.0-110, (ofGetHeight()/2.0+95));
+        }
+        
+        ofPopMatrix();
+        
+        
+        if(searching == true){
+            
+             ofSetColor(255, 255, 255);
+             ofSetLineWidth(5);
+             ofLine(ofGetWidth()/2-25, ofGetHeight()/2, ofGetWidth()/2+25, ofGetHeight()/2);
+             ofLine( ofGetWidth()/2, ofGetHeight()/2-25, ofGetWidth()/2, ofGetHeight()/2+25);
+             
+             ofNoFill();
+             
+             ofBeginShape();
+             ofVertex(ofGetWidth()/2-200, ofGetHeight()/2-100);
+             ofVertex(ofGetWidth()/2-200, ofGetHeight()/2-150);
+             ofVertex(ofGetWidth()/2-134, ofGetHeight()/2-150);
+             ofEndShape();
+             
+             ofBeginShape();
+             ofVertex(ofGetWidth()/2+200, ofGetHeight()/2-100);
+             ofVertex(ofGetWidth()/2+200, ofGetHeight()/2-150);
+             ofVertex(ofGetWidth()/2+134, ofGetHeight()/2-150);
+             ofEndShape();
+             
+             ofBeginShape();
+             ofVertex(ofGetWidth()/2+200, ofGetHeight()/2+100);
+             ofVertex(ofGetWidth()/2+200, ofGetHeight()/2+150);
+             ofVertex(ofGetWidth()/2+134, ofGetHeight()/2+150);
+             ofEndShape();
+             
+             ofBeginShape();
+             ofVertex(ofGetWidth()/2-200, ofGetHeight()/2+100);
+             ofVertex(ofGetWidth()/2-200, ofGetHeight()/2+150);
+             ofVertex(ofGetWidth()/2-134, ofGetHeight()/2+150);
+             ofEndShape();
+             
+             ofFill();
+             
+        }
+        
+    }
+
+    
+    
+    if( certain ){
+   
         drawSingleTile();
+            gui.draw();
+        objectdetect = false;
+        searching = false;
+        startscreen = false;
 	}
     //draw the GUI
-    gui.draw();
+
 	
 }
 
@@ -205,6 +425,19 @@ void ofApp::exit(){
 
 //--------------------------------------------------------------
 void ofApp::touchDown(ofTouchEventArgs & touch){
+    
+    ofSetRectMode(OF_RECTMODE_CENTER);
+    tile.draw(ofGetWidth()/2.0, (ofGetHeight()/2.0)-90);
+    ofRect(ofGetWidth()/2.0, (ofGetHeight()/2.0+90), 260, 50);
+
+
+    if(startscreen == true){
+    //bLearnBakground = true;
+    pressed = true;
+    startscreen = false;
+    objectdetect = true;
+    searching = true;
+    }
 
 }
 
@@ -215,6 +448,9 @@ void ofApp::touchMoved(ofTouchEventArgs & touch){
 
 //--------------------------------------------------------------
 void ofApp::touchUp(ofTouchEventArgs & touch){
+    
+    pressed = false;
+
 
 }
 

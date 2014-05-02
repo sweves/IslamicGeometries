@@ -28,6 +28,53 @@ class ofApp : public ofxiOSApp {
         void gotMemoryWarning();
         void deviceOrientationChanged(int newOrientation);
     
+    //----------SARAHS OPENCV CODE
+    
+    ofVideoGrabber vidGrabber;
+    
+    ofTexture tex;
+    
+    ofxCvColorImage	colorImg;
+    
+    ofxCvGrayscaleImage grayImage;
+    ofxCvGrayscaleImage grayBg;
+    ofxCvGrayscaleImage grayDiff;
+    
+    float capW;
+    float capH;
+    
+    ofxCvContourFinder contourFinder;
+    
+    int threshold;
+    bool bLearnBakground;
+    
+    ofImage tile;
+    ofxCvColorImage tilesample;
+    ofxCvColorImage tilesample1;
+    
+    ofImage recognize;
+    ofImage recognize1;
+    
+    ofTrueTypeFont andalemono;
+    ofxCvColorImage subjectImg;
+    ofxCvColorImage subjectImg1;
+    
+    
+    bool pressed;
+    bool startscreen;
+    bool objectdetect;
+    bool searching;
+    
+    double maximumvalue;
+    
+    ofPoint subjectLocation;
+    ofPoint subjectLocation1;
+    
+    
+    bool certain;
+    bool certain1;
+
+    
     //----------BETTYS PATTERN CODE
     vector <ofPoint> points;
     vector <ofPoint> cardioidPoints;
